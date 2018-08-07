@@ -1,7 +1,6 @@
 
 # coding: utf-8
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import keras
 from skimage.filters import gabor_kernel
@@ -16,7 +15,6 @@ from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.normalization import BatchNormalization
 from keras.utils import np_utils
-from keras_sequential_ascii import sequential_model_to_ascii_printout
 from keras import backend as K
 if K.backend()=='tensorflow':
     K.set_image_dim_ordering("tf")
@@ -27,9 +25,6 @@ from scipy import ndimage as ndi
 import tensorflow as tf
 import multiprocessing as mp
 
-# Loading the CIFAR-10 datasets
-from keras.datasets import cifar10
-
 batch_size = 32
 # 32 examples in a mini-batch, smaller batch size means more updates in one epoch
 
@@ -37,20 +32,10 @@ num_classes = 10
 epochs = 24
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
-(x_train, y_train), (x_test, y_test) = cifar10.load_data()
-
-fig = plt.figure(figsize=(8,3))
-for i in range(num_classes):
-    ax = fig.add_subplot(2, 5, 1 + i, xticks=[], yticks=[])
-    idx = np.where(y_train[:]==i)[0]
-    features_idx = x_train[idx,::]
-    img_num = np.random.randint(features_idx.shape[0])
-    im = features_idx[img_num,::]
-    ax.set_title(class_names[i])
-    plt.imshow(im)
-plt.show()
-
-
+x_train = np.load('dataset/x_train.npy')
+x_test = np.load('dataset/x_test.npy')
+y_train = np.load('dataset/y_train.npy')
+y_test = np.load('dataset/y_test.npy')
 # ## Convert to Grayscale images
 
 def grayscale(data, dtype='float32'):
