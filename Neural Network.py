@@ -34,7 +34,7 @@ import multiprocessing as mp
 from keras.datasets import cifar10
 
 
-# In[ ]:
+# In[2]:
 
 
 batch_size = 32
@@ -44,7 +44,7 @@ epochs = 24
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 
-# In[18]:
+# In[3]:
 
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
@@ -52,9 +52,13 @@ y_train = np_utils.to_categorical(y_train, num_classes)
 y_test = np_utils.to_categorical(y_test, num_classes)
 x_train = np.load('convolved_x_train_cv2.npy')
 x_test = np.load('convolved_x_test_cv2.npy')
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+x_train  /= 255
+x_test /= 255
 
 
-# In[20]:
+# In[4]:
 
 
 def base_model():
@@ -86,7 +90,7 @@ def base_model():
     return model
 
 
-# In[22]:
+# In[5]:
 
 
 print(x_train.shape)
@@ -97,7 +101,7 @@ cnn_n.summary()
 cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
-# In[24]:
+# In[7]:
 
 
 score = cnn_n.evaluate(x_test, y_test, verbose=0)
@@ -105,7 +109,7 @@ print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
 
-# In[29]:
+# In[8]:
 
 
 # serialize model to JSON
