@@ -34,6 +34,16 @@ import multiprocessing as mp
 from keras.datasets import cifar10
 
 
+# In[ ]:
+
+
+batch_size = 32
+# 32 examples in a mini-batch, smaller batch size means more updates in one epoch
+num_classes = 10
+epochs = 24
+class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
+
 # In[18]:
 
 
@@ -42,17 +52,6 @@ y_train = np_utils.to_categorical(y_train, num_classes)
 y_test = np_utils.to_categorical(y_test, num_classes)
 x_train = np.load('convolved_x_train_cv2.npy')
 x_test = np.load('convolved_x_test_cv2.npy')
-
-
-# In[19]:
-
-
-batch_size = 32
-# 32 examples in a mini-batch, smaller batch size means more updates in one epoch
-
-num_classes = 10
-epochs = 24
-class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 
 # In[20]:
