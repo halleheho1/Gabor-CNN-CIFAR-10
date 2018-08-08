@@ -20,7 +20,6 @@ from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.normalization import BatchNormalization
 from keras.utils import np_utils
-from keras_sequential_ascii import sequential_model_to_ascii_printout
 from keras import backend as K
 if K.backend()=='tensorflow':
     K.set_image_dim_ordering("tf")
