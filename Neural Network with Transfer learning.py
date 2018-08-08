@@ -92,13 +92,13 @@ x_test /= 255
 
 opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
 loaded_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-cnn_n = loaded_model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
+cnn_history = loaded_model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
 # In[ ]:
 
 
-score = cnn_n.evaluate(x_test, y_test, verbose=0)
+score = loaded_model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
@@ -107,10 +107,10 @@ print('Test accuracy:', score[1])
 
 
 # serialize model to JSON
-model_json = cnn_n.to_json()
+model_json = loaded_model.to_json()
 with open("models/transferred_model.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-cnn_n.save_weights("models/transferred_model.h5")
+loaded_model.save_weights("models/transferred_model.h5")
 print("Saved model to disk")
 
