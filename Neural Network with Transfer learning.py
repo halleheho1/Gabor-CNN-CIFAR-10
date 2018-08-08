@@ -92,7 +92,7 @@ x_test /= 255
 
 opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
 loaded_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-cnn = loaded_model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
+cnn_n = loaded_model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
 # In[ ]:
