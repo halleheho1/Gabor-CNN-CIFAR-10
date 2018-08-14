@@ -197,10 +197,10 @@ print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)
 
 
 # serialize model to JSON
-model_json = cnn_n.to_json()
-with open("models/model.json", "w") as json_file:
+model_json = model.to_json()
+with open("models/model5x5.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-cnn_n.save_weights("models/model.h5")
+model.save_weights("models/model5x5.h5")
 print("Saved model to disk")
 
