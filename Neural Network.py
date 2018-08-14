@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[59]:
 
 
 import time
@@ -32,9 +32,10 @@ import multiprocessing as mp
  
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
+import cv2
 
 
-# In[2]:
+# In[60]:
 
 
 batch_size = 32
@@ -44,26 +45,78 @@ epochs = 24
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 
-# In[3]:
+# In[62]:
+
+
+def grayscale(data, dtype='float32'):
+    # luma coding weighted average in video systems
+    r, g, b = np.asarray(.3, dtype=dtype), np.asarray(.59, dtype=dtype), np.asarray(.11, dtype=dtype)
+    rst = r * data[:, :, :, 0] + g * data[:, :, :, 1] + b * data[:, :, :, 2]
+    return rst
+
+
+# In[63]:
+
+
+def add_dimension(data):
+    data = np.array([data])
+    #re arange the dimension
+    print(data.shape)
+    data = np.einsum('hijk->ijkh', data)
+    return data
+
+
+# In[96]:
 
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-y_train = np_utils.to_categorical(y_train, num_classes)
-y_test = np_utils.to_categorical(y_test, num_classes)
-x_train = np.load('convolved_x_train_cv2.npy')
-x_test = np.load('convolved_x_test_cv2.npy')
+train_selected_amount = 10
+test_selected_amount = 10
+num_classes = 10
+x_train = add_dimension(grayscale(x_train[:train_selected_amount]))
+x_test = add_dimension(grayscale(x_test[:test_selected_amount]))
+y_train = np_utils.to_categorical(y_train[:train_selected_amount], num_classes)
+y_test = np_utils.to_categorical(y_test[:test_selected_amount], num_classes)
+
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 x_train  /= 255
 x_test /= 255
 
 
-# In[4]:
+# In[98]:
+
+
+def custom_gabor(shape, dtype=None):
+    orientation_spread = np.linspace(0, 4, 8) / 4. * np.pi
+    scales = np.linspace(0.1, 0.4, 6)
+    real_kernels = []
+#     size, sigma, theta, lambda, gamma aspect ratio
+    for orientation in orientation_spread:
+        for scale in scales:
+            real_kernel = cv2.getGaborKernel((3, 3), 3, orientation, scale, 1, 0)
+#             real_kernel = np.delete(np.delete(real_kernel, -1, 0), -1, 1)
+#             print(real_kernel.shape)
+            real_kernels.append(real_kernel)
+    real_kernels = np.array([real_kernels])
+    real_kernels = np.einsum('hijk->jkhi', real_kernels)
+    print(real_kernels.shape)
+
+    real_kernels = K.variable(real_kernels)
+#     print(real_kernels.shape)
+    random = K.random_normal(shape, dtype=dtype)
+    print('here')
+    print(random)
+    print(random.shape)
+    return real_kernels
+
+
+# In[99]:
 
 
 def base_model():
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', data_format='channels_last', input_shape=x_train.shape[1:]))
+    model.add(Conv2D(48, (3, 3), padding='same',kernel_initializer=custom_gabor, data_format='channels_last', input_shape=x_train.shape[1:]))
     model.add(Activation('relu'))
     model.add(Conv2D(32, (3, 3)))
     model.add(Activation('relu'))
@@ -90,18 +143,16 @@ def base_model():
     return model
 
 
-# In[5]:
+# In[100]:
 
 
-print(x_train.shape)
-print(y_train.shape)
 cnn_n = base_model()
 cnn_n.summary()
 
 cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
-# In[7]:
+# In[101]:
 
 
 score = cnn_n.evaluate(x_test, y_test, verbose=0)
@@ -109,7 +160,7 @@ print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
 
-# In[8]:
+# In[ ]:
 
 
 # serialize model to JSON
