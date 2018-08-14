@@ -99,13 +99,15 @@ x_test /= 255
 
 
 def custom_gabor(shape, dtype=None):
-    orientation_spread = np.linspace(0, 4, 8) / 4. * np.pi
-    scales = np.linspace(0.1, 0.4, 6)
+#    orientation_spread = np.linspace(0, 8, 8) / 4. * np.pi
+    pi = np.pi
+    orientation_spread = np.array([0, pi/4, pi/2, pi*3/4, pi, pi*5/4, pi*3/2, 2*pi])
+    scales = np.linspace(2, 3, 6)
     real_kernels = []
 #     size, sigma, theta, lambda, gamma aspect ratio
     for orientation in orientation_spread:
         for scale in scales:
-            real_kernel = cv2.getGaborKernel((3, 3), 3, orientation, scale, 1, 0)
+            real_kernel = cv2.getGaborKernel((5, 5), 1, orientation, scale, 1, 0)
 #             real_kernel = np.delete(np.delete(real_kernel, -1, 0), -1, 1)
             real_kernels.append(real_kernel)
     real_kernels = np.array([real_kernels])
@@ -175,7 +177,7 @@ def base_model(shape):
 # In[147]:
 
 
-k = 10
+k = 5
 scores = []
 folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(x_train, init_y_train))
 for j, (train_idx, val_idx) in enumerate(folds):
