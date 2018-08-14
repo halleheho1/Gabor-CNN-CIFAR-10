@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[59]:
+# In[136]:
 
 
 import time
@@ -33,9 +33,10 @@ import multiprocessing as mp
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
 import cv2
+from sklearn.model_selection import train_test_split, StratifiedKFold
 
 
-# In[60]:
+# In[137]:
 
 
 batch_size = 32
@@ -45,7 +46,7 @@ epochs = 24
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 
-# In[62]:
+# In[138]:
 
 
 def grayscale(data, dtype='float32'):
@@ -55,7 +56,7 @@ def grayscale(data, dtype='float32'):
     return rst
 
 
-# In[63]:
+# In[139]:
 
 
 def add_dimension(data):
@@ -66,17 +67,21 @@ def add_dimension(data):
     return data
 
 
-# In[96]:
+# In[140]:
 
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-train_selected_amount = 10
-test_selected_amount = 10
+train_selected_amount = 50000
+test_selected_amount = 10000
 num_classes = 10
+
+init_y_train = y_train[:train_selected_amount]
+init_y_test = y_test[:test_selected_amount]
+
 x_train = add_dimension(grayscale(x_train[:train_selected_amount]))
 x_test = add_dimension(grayscale(x_test[:test_selected_amount]))
-y_train = np_utils.to_categorical(y_train[:train_selected_amount], num_classes)
-y_test = np_utils.to_categorical(y_test[:test_selected_amount], num_classes)
+y_train = np_utils.to_categorical(init_y_train, num_classes)
+y_test = np_utils.to_categorical(init_y_test, num_classes)
 
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
@@ -84,7 +89,13 @@ x_train  /= 255
 x_test /= 255
 
 
-# In[98]:
+# In[141]:
+
+
+
+
+
+# In[142]:
 
 
 def custom_gabor(shape, dtype=None):
@@ -96,7 +107,6 @@ def custom_gabor(shape, dtype=None):
         for scale in scales:
             real_kernel = cv2.getGaborKernel((3, 3), 3, orientation, scale, 1, 0)
 #             real_kernel = np.delete(np.delete(real_kernel, -1, 0), -1, 1)
-#             print(real_kernel.shape)
             real_kernels.append(real_kernel)
     real_kernels = np.array([real_kernels])
     real_kernels = np.einsum('hijk->jkhi', real_kernels)
@@ -105,18 +115,18 @@ def custom_gabor(shape, dtype=None):
     real_kernels = K.variable(real_kernels)
 #     print(real_kernels.shape)
     random = K.random_normal(shape, dtype=dtype)
-    print('here')
-    print(random)
-    print(random.shape)
+#     print('here')
+#     print(random)
+#     print(random.shape)
     return real_kernels
 
 
-# In[99]:
+# In[143]:
 
 
-def base_model():
+def base_model(shape):
     model = Sequential()
-    model.add(Conv2D(48, (3, 3), padding='same',kernel_initializer=custom_gabor, data_format='channels_last', input_shape=x_train.shape[1:]))
+    model.add(Conv2D(48, (3, 3), padding='same',kernel_initializer=custom_gabor, data_format='channels_last', input_shape=shape))
     model.add(Activation('relu'))
     model.add(Conv2D(32, (3, 3)))
     model.add(Activation('relu'))
@@ -143,21 +153,42 @@ def base_model():
     return model
 
 
-# In[100]:
+# In[122]:
 
 
-cnn_n = base_model()
-cnn_n.summary()
+# cnn_n = base_model(x_train.shape[1:])
+# cnn_n.summary()
 
-cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
-
-
-# In[101]:
+# cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
-score = cnn_n.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+# In[123]:
+
+
+# score = cnn_n.evaluate(x_test, y_test, verbose=0)
+# print('Test loss:', score[0])
+# print('Test accuracy:', score[1])
+
+
+# ### K fold cross validation
+
+# In[147]:
+
+
+k = 10
+scores = []
+folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(x_train, init_y_train))
+for j, (train_idx, val_idx) in enumerate(folds):
+    print('fold ', j)
+    x_train_cv = x_train[train_idx]
+    y_train_cv = y_train[train_idx]
+    x_valid_cv = x_train[val_idx]
+    y_valid_cv = y_train[val_idx]
+    model = base_model(x_train_cv.shape[1:])
+    model.fit(x_train_cv, y_train_cv, batch_size=batch_size, epochs=epochs, validation_data=(x_valid_cv, y_valid_cv), shuffle=True)
+    score = model.evaluate(x_test, y_test, verbose=0)
+    scores.append(score[1] * 100)
+print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
 
 
 # In[ ]:
