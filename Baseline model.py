@@ -32,12 +32,13 @@ import multiprocessing as mp
  
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
+import cv2
 
 
 # In[10]:
 
 
-batch_size = 32
+batch_size = 15
 # 32 examples in a mini-batch, smaller batch size means more updates in one epoch
 num_classes = 10
 epochs = 24
@@ -60,24 +61,50 @@ class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', '
 # plt.show()
 
 
+# In[12]:
+
+
+def add_dimension(data):
+    data = np.array([data])
+    data = np.einsum('hijk->ijkh', data)
+    return data
+
+
 # In[13]:
 
 
-sampling = 50000
-x_train = x_train.astype('float32')[:sampling]
+def grayscale(data, dtype='float32'):
+    # luma coding weighted average in video systems
+    r, g, b = np.asarray(.3, dtype=dtype), np.asarray(.59, dtype=dtype), np.asarray(.11, dtype=dtype)
+    rst = r * data[:, :, :, 0] + g * data[:, :, :, 1] + b * data[:, :, :, 2]
+    rst = add_dimension(rst)
+    return rst
+
+
+# In[14]:
+
+
+sampling = 10
+x_train = grayscale(x_train.astype('float32')[:sampling])
 y_train = np_utils.to_categorical(y_train[:sampling], num_classes)
 y_test = np_utils.to_categorical(y_test, num_classes)
-x_test = x_test.astype('float32')
+x_test = grayscale(x_test.astype('float32'))
 x_train  /= 255
 x_test /= 255
 
 
-# In[7]:
+# In[15]:
+
+
+print(x_train.shape)
+
+
+# In[16]:
 
 
 def base_model():
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', data_format='channels_last', input_shape=x_train.shape[1:]))
+    model.add(Conv2D(48, (3, 3), padding='same', data_format='channels_last', input_shape=x_train.shape[1:]))
     model.add(Activation('relu'))
     model.add(Conv2D(32, (3, 3)))
     model.add(Activation('relu'))
@@ -104,19 +131,20 @@ def base_model():
     return model
 
 
-# In[8]:
+# In[17]:
 
 
-print(x_train.shape[1:])
+# print(x_train.shape[1:])
 
 cnn_n = base_model()
+cnn_n.layers[0].tranable = False
 cnn_n.summary()
 cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
 # # Evaluation
 
-# In[14]:
+# In[ ]:
 
 
 score = cnn_n.evaluate(x_test, y_test, verbose=0)
@@ -124,13 +152,13 @@ print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
 
-# In[15]:
+# In[ ]:
 
 
 # cnn_n.layers[0].get_weights()
 
 
-# In[16]:
+# In[ ]:
 
 
 # # Plots for training and testing process: loss and accuracy
