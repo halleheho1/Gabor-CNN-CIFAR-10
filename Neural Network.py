@@ -24,11 +24,11 @@ if K.backend()=='tensorflow':
     K.set_image_dim_ordering("tf")
 from skimage.color import rgb2gray
 from scipy import ndimage as ndi
- 
+
 # Import Tensorflow with multiprocessing
 import tensorflow as tf
 import multiprocessing as mp
- 
+
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
 import cv2
@@ -192,7 +192,10 @@ folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(x_t
 #    scores.append(score[1] * 100)
 model = base_model(x_train.shape[1:])
 history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
-print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
+score = model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+# print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
 pickle.dump(history.history, open("history.p", "wb"))
 
 # In[ ]:
@@ -205,4 +208,3 @@ with open("models/model_test.json", "w") as json_file:
 # serialize weights to HDF5
 model.save_weights("models/model_test.h5")
 print("Saved model to disk")
-
