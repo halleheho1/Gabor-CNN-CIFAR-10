@@ -1,10 +1,11 @@
 
 # coding: utf-8
 
-# In[136]:
+# In[1]:
 
 
 import time
+import matplotlib.pyplot as plt
 import numpy as np
 import keras
 from skimage.filters import gabor_kernel
@@ -24,18 +25,18 @@ if K.backend()=='tensorflow':
     K.set_image_dim_ordering("tf")
 from skimage.color import rgb2gray
 from scipy import ndimage as ndi
-
+ 
 # Import Tensorflow with multiprocessing
 import tensorflow as tf
 import multiprocessing as mp
-
+ 
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
 import cv2
 from sklearn.model_selection import train_test_split, StratifiedKFold
-import pickle
 
-# In[137]:
+
+# In[2]:
 
 
 batch_size = 32
@@ -45,7 +46,7 @@ epochs = 24
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 
-# In[138]:
+# In[3]:
 
 
 def grayscale(data, dtype='float32'):
@@ -55,7 +56,7 @@ def grayscale(data, dtype='float32'):
     return rst
 
 
-# In[139]:
+# In[4]:
 
 
 def add_dimension(data):
@@ -66,7 +67,7 @@ def add_dimension(data):
     return data
 
 
-# In[140]:
+# In[5]:
 
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
@@ -88,13 +89,7 @@ x_train  /= 255
 x_test /= 255
 
 
-# In[141]:
-
-
-
-
-
-# In[142]:
+# In[6]:
 
 
 def custom_gabor(shape, dtype=None):
@@ -106,7 +101,7 @@ def custom_gabor(shape, dtype=None):
 #     size, sigma, theta, lambda, gamma aspect ratio
     for orientation in orientation_spread:
         for scale in scales:
-            real_kernel = cv2.getGaborKernel((5, 5), 1, orientation, scale, 1, 0)
+            real_kernel = cv2.getGaborKernel((13, 13), 1, orientation, scale, 1, 0)
 #             real_kernel = np.delete(np.delete(real_kernel, -1, 0), -1, 1)
             real_kernels.append(real_kernel)
     real_kernels = np.array([real_kernels])
@@ -114,15 +109,11 @@ def custom_gabor(shape, dtype=None):
     print(real_kernels.shape)
 
     real_kernels = K.variable(real_kernels)
-#     print(real_kernels.shape)
     random = K.random_normal(shape, dtype=dtype)
-#     print('here')
-#     print(random)
-#     print(random.shape)
     return real_kernels
 
 
-# In[143]:
+# In[7]:
 
 
 def base_model(shape):
@@ -147,23 +138,21 @@ def base_model(shape):
     model.add(Dropout(0.5))
     model.add(Dense(num_classes))
     model.add(Activation('softmax'))
-    # sgd = SGD(lr = 0.1, decay = 1e-6, momentum=0.9, nesterov=True)
     opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
-    # Train model
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     return model
 
 
-# In[122]:
+# In[10]:
 
 
-# cnn_n = base_model(x_train.shape[1:])
-# cnn_n.summary()
+# model = base_model(x_train.shape[1:])
+# model.summary()
 
-# cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
+# cnn = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
-# In[123]:
+# In[ ]:
 
 
 # score = cnn_n.evaluate(x_test, y_test, verbose=0)
@@ -173,38 +162,33 @@ def base_model(shape):
 
 # ### K fold cross validation
 
-# In[147]:
+# In[8]:
 
 
-k = 2
+k = 10
 scores = []
-history = None
 folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(x_train, init_y_train))
-#for j, (train_idx, val_idx) in enumerate(folds):
-#    print('fold ', j)
-#    x_train_cv = x_train[train_idx]
-#    y_train_cv = y_train[train_idx]
-#    x_valid_cv = x_train[val_idx]
-#    y_valid_cv = y_train[val_idx]
-#    model = base_model(x_train_cv.shape[1:])
-#    history = model.fit(x_train_cv, y_train_cv, batch_size=batch_size, epochs=epochs, validation_data=(x_valid_cv, y_valid_cv), shuffle=True)
-#    score = model.evaluate(x_test, y_test, verbose=0)
-#    scores.append(score[1] * 100)
-model = base_model(x_train.shape[1:])
-history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
-score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-# print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
-pickle.dump(history.history, open("history.p", "wb"))
+for j, (train_idx, val_idx) in enumerate(folds):
+    print('fold ', j)
+    x_train_cv = x_train[train_idx]
+    y_train_cv = y_train[train_idx]
+    x_valid_cv = x_train[val_idx]
+    y_valid_cv = y_train[val_idx]
+    model = base_model(x_train_cv.shape[1:])
+    model.fit(x_train_cv, y_train_cv, batch_size=batch_size, epochs=epochs, validation_data=(x_valid_cv, y_valid_cv), shuffle=True)
+    score = model.evaluate(x_test, y_test, verbose=0)
+    scores.append(score[1] * 100)
+print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
+
 
 # In[ ]:
 
 
 # serialize model to JSON
 model_json = model.to_json()
-with open("models/model_test.json", "w") as json_file:
+with open("models/model13x13.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("models/model_test.h5")
+model.save_weights("models/model13x13.h5")
 print("Saved model to disk")
+
