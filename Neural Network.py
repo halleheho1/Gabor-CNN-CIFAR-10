@@ -5,7 +5,6 @@
 
 
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import keras
 from skimage.filters import gabor_kernel
@@ -34,7 +33,7 @@ import multiprocessing as mp
 from keras.datasets import cifar10
 import cv2
 from sklearn.model_selection import train_test_split, StratifiedKFold
-
+import pickle
 
 # In[137]:
 
@@ -177,30 +176,33 @@ def base_model(shape):
 # In[147]:
 
 
-k = 5
+k = 2
 scores = []
+history = None
 folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(x_train, init_y_train))
-for j, (train_idx, val_idx) in enumerate(folds):
-    print('fold ', j)
-    x_train_cv = x_train[train_idx]
-    y_train_cv = y_train[train_idx]
-    x_valid_cv = x_train[val_idx]
-    y_valid_cv = y_train[val_idx]
-    model = base_model(x_train_cv.shape[1:])
-    model.fit(x_train_cv, y_train_cv, batch_size=batch_size, epochs=epochs, validation_data=(x_valid_cv, y_valid_cv), shuffle=True)
-    score = model.evaluate(x_test, y_test, verbose=0)
-    scores.append(score[1] * 100)
+#for j, (train_idx, val_idx) in enumerate(folds):
+#    print('fold ', j)
+#    x_train_cv = x_train[train_idx]
+#    y_train_cv = y_train[train_idx]
+#    x_valid_cv = x_train[val_idx]
+#    y_valid_cv = y_train[val_idx]
+#    model = base_model(x_train_cv.shape[1:])
+#    history = model.fit(x_train_cv, y_train_cv, batch_size=batch_size, epochs=epochs, validation_data=(x_valid_cv, y_valid_cv), shuffle=True)
+#    score = model.evaluate(x_test, y_test, verbose=0)
+#    scores.append(score[1] * 100)
+model = base_model(x_train.shape[1:])
+history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
-
+pickle.dump(history.history, open("history.p", "wb"))
 
 # In[ ]:
 
 
 # serialize model to JSON
 model_json = model.to_json()
-with open("models/model5x5.json", "w") as json_file:
+with open("models/model_test.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("models/model5x5.h5")
+model.save_weights("models/model_test.h5")
 print("Saved model to disk")
 
