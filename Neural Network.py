@@ -101,7 +101,7 @@ def custom_gabor(shape, dtype=None):
 #     size, sigma, theta, lambda, gamma aspect ratio
     for orientation in orientation_spread:
         for scale in scales:
-            real_kernel = cv2.getGaborKernel((13, 13), 1, orientation, scale, 1, 0)
+            real_kernel = cv2.getGaborKernel((20, 20), 1, orientation, scale, 1, 0)
 #             real_kernel = np.delete(np.delete(real_kernel, -1, 0), -1, 1)
             real_kernels.append(real_kernel)
     real_kernels = np.array([real_kernels])
@@ -186,9 +186,9 @@ print('Test accuracy:', score[1])
 
 # serialize model to JSON
 model_json = model.to_json()
-with open("models/model13x13.json", "w") as json_file:
+with open("models/model20x20.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("models/model13x13.h5")
+model.save_weights("models/model20x20.h5")
 print("Saved model to disk")
 
