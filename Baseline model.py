@@ -155,7 +155,12 @@ print('Test accuracy:', score[1])
 # In[ ]:
 
 
-# cnn_n.layers[0].get_weights()
+model_json = model.to_json()
+with open("models/baseline.json", "w") as json_file:
+    json_file.write(model_json)
+# serialize weights to HDF5
+model.save_weights("models/baseline.h5")
+print("Saved model to disk")
 
 
 # In[ ]:
