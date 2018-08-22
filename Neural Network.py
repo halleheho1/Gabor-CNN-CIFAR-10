@@ -71,8 +71,8 @@ def add_dimension(data):
 
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-train_selected_amount = 10
-test_selected_amount = 10
+train_selected_amount = 50000
+test_selected_amount = 10000
 num_classes = 10
 
 init_y_train = y_train[:train_selected_amount]
@@ -146,16 +146,16 @@ def base_model(shape):
 # In[19]:
 
 
-# model = base_model(x_train.shape[1:])
-# model.summary()
+model = base_model(x_train.shape[1:])
+model.summary()
 
-# cnn = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
+cnn = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
 # In[ ]:
 
 
-score = cnn_n.evaluate(x_test, y_test, verbose=0)
+score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
