@@ -139,7 +139,7 @@ def base_model():
 
 model = base_model()
 model.summary()
-cnn = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
+history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
 # # Evaluation
