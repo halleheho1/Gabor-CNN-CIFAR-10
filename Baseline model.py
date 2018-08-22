@@ -33,6 +33,7 @@ import multiprocessing as mp
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
 import cv2
+import pickle
 
 
 # In[2]:
@@ -159,6 +160,7 @@ with open("models/baseline.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
 model.save("models/baseline.h5")
+pickle.dump(history, open('history/baseline.p','w'))
 print("Saved model to disk")
 
 
