@@ -191,6 +191,6 @@ with open("models/model13x13.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
 model.save("models/model13x13.h5")
-pickle.dump(history, open('history/model13x13.p','w'))
+pickle.dump(history.history, open('history/model13x13.p','w'))
 print("Saved model to disk")
 
