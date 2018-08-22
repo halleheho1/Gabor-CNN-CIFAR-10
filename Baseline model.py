@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[9]:
+# In[1]:
 
 
 import time
@@ -35,7 +35,7 @@ from keras.datasets import cifar10
 import cv2
 
 
-# In[10]:
+# In[2]:
 
 
 batch_size = 15
@@ -46,7 +46,7 @@ class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', '
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
 
-# In[11]:
+# In[3]:
 
 
 # fig = plt.figure(figsize=(8,3))
@@ -61,7 +61,7 @@ class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', '
 # plt.show()
 
 
-# In[12]:
+# In[4]:
 
 
 def add_dimension(data):
@@ -70,7 +70,7 @@ def add_dimension(data):
     return data
 
 
-# In[13]:
+# In[5]:
 
 
 def grayscale(data, dtype='float32'):
@@ -81,10 +81,10 @@ def grayscale(data, dtype='float32'):
     return rst
 
 
-# In[14]:
+# In[6]:
 
 
-sampling = 10
+sampling = 50000
 x_train = grayscale(x_train.astype('float32')[:sampling])
 y_train = np_utils.to_categorical(y_train[:sampling], num_classes)
 y_test = np_utils.to_categorical(y_test, num_classes)
@@ -93,13 +93,13 @@ x_train  /= 255
 x_test /= 255
 
 
-# In[15]:
+# In[7]:
 
 
 print(x_train.shape)
 
 
-# In[16]:
+# In[8]:
 
 
 def base_model():
@@ -131,15 +131,14 @@ def base_model():
     return model
 
 
-# In[17]:
+# In[9]:
 
 
 # print(x_train.shape[1:])
 
-cnn_n = base_model()
-cnn_n.layers[0].tranable = False
-cnn_n.summary()
-cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
+model = base_model()
+model.summary()
+cnn = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), shuffle=True)
 
 
 # # Evaluation
@@ -147,7 +146,7 @@ cnn = cnn_n.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validati
 # In[ ]:
 
 
-score = cnn_n.evaluate(x_test, y_test, verbose=0)
+score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
@@ -159,7 +158,7 @@ model_json = model.to_json()
 with open("models/baseline.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("models/baseline.h5")
+model.save("models/baseline.h5")
 print("Saved model to disk")
 
 
