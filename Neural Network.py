@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[11]:
 
 
 import time
@@ -36,7 +36,7 @@ import cv2
 from sklearn.model_selection import train_test_split, StratifiedKFold
 
 
-# In[2]:
+# In[12]:
 
 
 batch_size = 32
@@ -46,7 +46,7 @@ epochs = 24
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 
-# In[3]:
+# In[13]:
 
 
 def grayscale(data, dtype='float32'):
@@ -56,7 +56,7 @@ def grayscale(data, dtype='float32'):
     return rst
 
 
-# In[4]:
+# In[14]:
 
 
 def add_dimension(data):
@@ -67,12 +67,12 @@ def add_dimension(data):
     return data
 
 
-# In[5]:
+# In[16]:
 
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-train_selected_amount = 50000
-test_selected_amount = 10000
+train_selected_amount = 10
+test_selected_amount = 10
 num_classes = 10
 
 init_y_train = y_train[:train_selected_amount]
@@ -89,7 +89,7 @@ x_train  /= 255
 x_test /= 255
 
 
-# In[6]:
+# In[17]:
 
 
 def custom_gabor(shape, dtype=None):
@@ -113,14 +113,14 @@ def custom_gabor(shape, dtype=None):
     return real_kernels
 
 
-# In[7]:
+# In[18]:
 
 
 def base_model(shape):
     model = Sequential()
     model.add(Conv2D(48, (3, 3), padding='same',kernel_initializer=custom_gabor, data_format='channels_last', input_shape=shape))
     model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
+    model.add(Conv2D(48, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
@@ -143,7 +143,7 @@ def base_model(shape):
     return model
 
 
-# In[10]:
+# In[19]:
 
 
 # model = base_model(x_train.shape[1:])
@@ -155,9 +155,9 @@ def base_model(shape):
 # In[ ]:
 
 
-# score = cnn_n.evaluate(x_test, y_test, verbose=0)
-# print('Test loss:', score[0])
-# print('Test accuracy:', score[1])
+score = cnn_n.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
 
 
 # ### K fold cross validation
@@ -165,20 +165,20 @@ def base_model(shape):
 # In[8]:
 
 
-k = 10
-scores = []
-folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(x_train, init_y_train))
-for j, (train_idx, val_idx) in enumerate(folds):
-    print('fold ', j)
-    x_train_cv = x_train[train_idx]
-    y_train_cv = y_train[train_idx]
-    x_valid_cv = x_train[val_idx]
-    y_valid_cv = y_train[val_idx]
-    model = base_model(x_train_cv.shape[1:])
-    model.fit(x_train_cv, y_train_cv, batch_size=batch_size, epochs=epochs, validation_data=(x_valid_cv, y_valid_cv), shuffle=True)
-    score = model.evaluate(x_test, y_test, verbose=0)
-    scores.append(score[1] * 100)
-print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
+# k = 10
+# scores = []
+# folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(x_train, init_y_train))
+# for j, (train_idx, val_idx) in enumerate(folds):
+#     print('fold ', j)
+#     x_train_cv = x_train[train_idx]
+#     y_train_cv = y_train[train_idx]
+#     x_valid_cv = x_train[val_idx]
+#     y_valid_cv = y_train[val_idx]
+#     model = base_model(x_train_cv.shape[1:])
+#     model.fit(x_train_cv, y_train_cv, batch_size=batch_size, epochs=epochs, validation_data=(x_valid_cv, y_valid_cv), shuffle=True)
+#     score = model.evaluate(x_test, y_test, verbose=0)
+#     scores.append(score[1] * 100)
+# print("average accuracy: %.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
 
 
 # In[ ]:
