@@ -28,11 +28,11 @@ if K.backend()=='tensorflow':
     K.set_image_dim_ordering("tf")
 from skimage.color import rgb2gray
 from scipy import ndimage as ndi
- 
+
 # Import Tensorflow with multiprocessing
 import tensorflow as tf
 import multiprocessing as mp
- 
+
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
 import cv2
@@ -115,13 +115,13 @@ def generate_filter(start_angle=0):
         elips.append(elip)
         start_angle += 45
     return np.array(elips)
-  
+
 def negative_threshold(img):
     return np.where(img == 255, -1, 0)
 
 def positive_threshold(img):
     return np.where(img == 255, 1, 0)
-  
+
 
 # print(np.unique(orientation_selectivity_filters[1]))
 
@@ -200,10 +200,9 @@ print('Test accuracy:', score[1])
 
 # serialize model to JSON
 model_json = model.to_json()
-with open("models/model5x5.json", "w") as json_file:
+with open("models/model5x5_binary.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save("models/model5x5.h5")
-pickle.dump(history.history, open('history/model5x5.p','w'))
+model.save("models/model5x5_binary.h5")
+pickle.dump(history.history, open('history/model5x5_binary.p','w'))
 print("Saved model to disk")
-
