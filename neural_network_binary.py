@@ -8,7 +8,6 @@ Original file is located at
 """
 
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import keras
 from skimage.filters import gabor_kernel
@@ -96,7 +95,6 @@ def custom_gabor(shape, dtype=None):
     return real_kernels
 
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 
 def generate_filter(start_angle=0):
@@ -132,6 +130,8 @@ def custom_binary_initialiser(shape, dtype=None):
   elips_negative = negative_threshold(elips_minus)
   elips_positive = positive_threshold(elips_plus)
   orientation_selectivity_filters = elips_negative + elips_positive
+  print('first debug')
+  print(orientation_selectivity_filters.shape)
   filters = [orientation_selectivity_filters, orientation_selectivity_filters, orientation_selectivity_filters, orientation_selectivity_filters, orientation_selectivity_filters, orientation_selectivity_filters, orientation_selectivity_filters, orientation_selectivity_filters]
   filters = np.array([filters])
   filters = np.einsum('hijk->jkhi', filters)
