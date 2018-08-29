@@ -27,11 +27,11 @@ if K.backend()=='tensorflow':
     K.set_image_dim_ordering("tf")
 from skimage.color import rgb2gray
 from scipy import ndimage as ndi
- 
+
 # Import Tensorflow with multiprocessing
 import tensorflow as tf
 import multiprocessing as mp
- 
+
 # Loading the CIFAR-10 datasets
 from keras.datasets import cifar10
 import cv2
@@ -99,7 +99,7 @@ def negative_threshold(img):
 
 def positive_threshold(img):
     return np.where(img == 255, 1, 0)
-  
+
 
 # print(np.unique(orientation_selectivity_filters[1]))
 
@@ -206,7 +206,6 @@ model.save("model_binary.h5")
 pickle.dump(history.history, open('model_binary.p','w'))
 print("Saved model to disk")
 
-from google.colab import files
-files.download('model_binary.p')
-!ls
-
+# from google.colab import files
+# files.download('model_binary.p')
+# !ls
